@@ -1,0 +1,2 @@
+﻿Put your logo image here later as:
+static/img/logo.png
