@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 from .config import Config
 from .extensions import db, migrate, login_manager, csrf
+from .i18n import t, get_lang
 
 load_dotenv()
 
@@ -27,10 +28,25 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    # Register blueprints
     from .main import bp as main_bp
     from .auth import bp as auth_bp
+    from .services import bp as services_bp
+    from .milwaukee import bp as milwaukee_bp
+    from .invoices import bp as invoices_bp
+    from .support import bp as support_bp
+    from .contact import bp as contact_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(services_bp)
+    app.register_blueprint(milwaukee_bp)
+    app.register_blueprint(invoices_bp)
+    app.register_blueprint(support_bp)
+    app.register_blueprint(contact_bp)
+
+    @app.context_processor
+    def inject_helpers():
+        return {"t": t, "get_lang": get_lang}
 
     return app
