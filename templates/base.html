@@ -12,14 +12,16 @@
 
   <style>
     :root{
-      /* Theme system (you can tweak these later) */
-      --primary: #2db36c;     /* logo green (guess) */
-      --secondary: #1f2937;   /* dark slate for text */
-      --background: #f6f7fb;
-      --text: #111827;
-      --muted: #6b7280;
-      --card: #ffffff;
-      --border: #e5e7eb;
+      /* Grey Stone official brand */
+      --primary: #66C06A;     /* Logo green */
+      --secondary: #111111;   /* Logo black text */
+
+      /* UI neutrals */
+      --background: #F6F7F9;
+      --text: #111111;
+      --muted: #6B7280;
+      --card: #FFFFFF;
+      --border: #E5E7EB;
     }
 
     body{
@@ -32,68 +34,87 @@
       background: var(--card) !important;
       border-bottom: 1px solid var(--border);
     }
+
+    /* Bigger logo */
     .gs-brand-logo{
-      width: 72px;          /* BIGGER */
-      height: 72px;         /* BIGGER */
+      width: 78px;
+      height: 78px;
       object-fit: contain;
     }
+
     .navbar-brand span{
       color: var(--secondary);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: .2px;
+      font-size: 1.05rem;
     }
+
     .navbar .nav-link{
       color: var(--secondary) !important;
-      opacity: .85;
+      opacity: .82;
       transition: opacity .15s ease, color .15s ease;
     }
     .navbar .nav-link:hover{
       opacity: 1;
       color: var(--primary) !important;
     }
+
     .dropdown-menu{
       border: 1px solid var(--border);
       border-radius: 14px;
       overflow: hidden;
+      box-shadow: 0 .75rem 1.5rem rgba(17,17,17,.08);
     }
     .dropdown-item:hover{
-      background: rgba(45,179,108,.10);
+      background: rgba(102,192,106,.12);
     }
 
     /* Buttons */
     .btn-gs-primary{
       background: var(--primary);
       border-color: var(--primary);
-      color: white;
+      color: #fff;
     }
     .btn-gs-primary:hover{
       filter: brightness(.95);
-      color: white;
+      color: #fff;
     }
+
     .btn-gs-outline{
-      border-color: var(--border);
+      border: 1px solid var(--border);
       color: var(--secondary);
-      background: white;
+      background: #fff;
     }
     .btn-gs-outline:hover{
       border-color: var(--primary);
       color: var(--primary);
     }
 
-    /* Language buttons look clean on light navbar */
+    /* Language buttons (clean) */
     .gs-lang .btn{
       border-color: var(--border) !important;
       color: var(--secondary) !important;
-      background: white !important;
+      background: #fff !important;
     }
     .gs-lang .btn:hover{
       border-color: var(--primary) !important;
       color: var(--primary) !important;
     }
 
-    /* Cards / layout polish */
+    /* Page polish */
     .gs-shadow{
-      box-shadow: 0 .5rem 1rem rgba(17,24,39,.06);
+      box-shadow: 0 .5rem 1rem rgba(17,17,17,.06);
+    }
+
+    /* Alerts look nicer */
+    .alert{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    /* Footer */
+    footer{
+      background: #fff;
     }
   </style>
 </head>
@@ -214,7 +235,7 @@
   {% block content %}{% endblock %}
 </main>
 
-<footer class="border-top py-3 mt-4 bg-white">
+<footer class="border-top py-3 mt-4">
   <div class="container small text-muted">Grey Stone</div>
 </footer>
 
