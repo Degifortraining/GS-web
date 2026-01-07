@@ -28,7 +28,12 @@ def create_app():
 
     login_manager.login_view = "auth.login"
 
-    from .models import User
+    # Import models so migrations can detect them
+    from .models import User  # noqa
+    from .forms_models import QuoteRequest, ContactMessage, TrainingRegistration  # noqa
+    from .rent.models import Tool, RentalRequest  # noqa
+    from .payments.models import Order, Payment  # noqa
+    from .products.models import Product  # noqa  <-- NEW
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -45,8 +50,6 @@ def create_app():
     from .invoices import bp as invoices_bp
     from .support import bp as support_bp
     from .contact import bp as contact_bp
-
-    # NEW (Step 7)
     from .rent import bp as rent_bp
     from .payments import bp as payments_bp
 
@@ -57,8 +60,6 @@ def create_app():
     app.register_blueprint(invoices_bp)
     app.register_blueprint(support_bp)
     app.register_blueprint(contact_bp)
-
-    # NEW (Step 7)
     app.register_blueprint(rent_bp)
     app.register_blueprint(payments_bp)
 
