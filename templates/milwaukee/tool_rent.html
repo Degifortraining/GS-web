@@ -2,26 +2,56 @@
 {% block content %}
 <div class="bg-white border rounded-4 p-4 shadow-sm">
   <h1 class="h3 fw-bold mb-3">{{ t('tool_rent') }}</h1>
-  <p class="text-muted">Choose a tool, dates, and quantity. Total will be calculated after submit.</p>
+  <p class="text-muted">
+    Tool images load from <code>static/products/&lt;part_number&gt;.png</code>
+  </p>
 
   <div class="table-responsive">
-    <table class="table align-middle">
+    <table class="table align-middle table-hover">
       <thead>
         <tr>
+          <th style="width: 80px;">Photo</th>
           <th>Tool</th>
           <th>Description</th>
-          <th>Daily Price (MNT)</th>
-          <th>Available</th>
+          <th style="width: 130px;">Part #</th>
+          <th style="width: 160px;">Daily (1–7) MNT</th>
+          <th style="width: 160px;">Daily (8–30) MNT</th>
+          <th style="width: 110px;">Available</th>
           <th style="width: 340px;">Rent</th>
         </tr>
       </thead>
+
       <tbody>
         {% for tool in tools %}
         <tr>
+          <td>
+            {% if tool.part_number %}
+            <img
+              src="{{ url_for('static', filename='products/' ~ tool.part_number ~ '.png') }}"
+              alt="{{ tool.part_number }}"
+              class="rounded border bg-white"
+              style="width: 56px; height: 56px; object-fit: contain;"
+              loading="lazy"
+              onerror="this.style.display='none';"
+            >
+            {% endif %}
+          </td>
+
           <td class="fw-semibold">{{ tool.name }}</td>
           <td class="text-muted small">{{ tool.description }}</td>
-          <td>{{ tool.daily_price }}</td>
+          <td class="small">{{ tool.part_number or "" }}</td>
+
+          <td>{{ "{:,}".format(tool.daily_price) }}</td>
+          <td>
+            {% if tool.daily_price_8_30 is not none %}
+              {{ "{:,}".format(tool.daily_price_8_30) }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
           <td>{{ tool.available_qty }}</td>
+
           <td>
             <form method="post" action="{{ url_for('rent.tools') }}" class="row g-2">
               <input type="hidden" name="tool_id" value="{{ tool.id }}">
@@ -41,8 +71,11 @@
           </td>
         </tr>
         {% endfor %}
+
         {% if tools|length == 0 %}
-        <tr><td colspan="5" class="text-muted">No tools yet. We will seed tools in the next step.</td></tr>
+        <tr>
+          <td colspan="8" class="text-muted">No tools yet. Run the seed script to import your Excel file.</td>
+        </tr>
         {% endif %}
       </tbody>
     </table>
