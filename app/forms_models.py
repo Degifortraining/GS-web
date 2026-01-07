@@ -1,6 +1,7 @@
 ﻿from datetime import datetime
 from .extensions import db
 
+
 class QuoteRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -11,6 +12,7 @@ class QuoteRequest(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -18,6 +20,7 @@ class ContactMessage(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class TrainingRegistration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
