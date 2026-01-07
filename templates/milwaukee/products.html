@@ -2,7 +2,10 @@
 {% block content %}
 <div class="bg-white border rounded-4 p-4 shadow-sm">
   <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-    <h1 class="h3 fw-bold mb-0">{{ t('products_catalog') }}</h1>
+    <div>
+      <h1 class="h3 fw-bold mb-1">{{ t('products_catalog') }}</h1>
+      <div class="text-muted small">Images load from <code>static/products/&lt;part_number&gt;.png</code></div>
+    </div>
     <div class="text-muted small">Showing {{ products|length }} items</div>
   </div>
 
@@ -10,29 +13,55 @@
     <table class="table table-hover align-middle">
       <thead>
         <tr>
+          <th style="width: 84px;">Photo</th>
           <th style="width: 160px;">Part number</th>
           <th>Description</th>
           <th style="width: 90px;">UOM</th>
           <th class="text-end" style="width: 160px;">Unit price (MNT)</th>
         </tr>
       </thead>
+
       <tbody>
         {% for p in products %}
         <tr>
+          <td>
+            <img
+              src="{{ url_for('static', filename='products/' ~ p.part_number ~ '.png') }}"
+              alt="{{ p.part_number }}"
+              class="rounded border bg-white"
+              style="width: 56px; height: 56px; object-fit: contain;"
+              loading="lazy"
+              onerror="this.style.display='none';"
+            >
+          </td>
+
           <td class="fw-semibold">{{ p.part_number }}</td>
-          <td class="text-muted">{{ p.description }}</td>
+
+          <td class="text-muted">
+            {{ p.description }}
+          </td>
+
           <td>{{ p.uom or "" }}</td>
-          <td class="text-end">{{ "{:,}".format(p.unit_price_mnt) }}</td>
+
+          <td class="text-end">
+            {{ "{:,}".format(p.unit_price_mnt) }}
+          </td>
         </tr>
         {% endfor %}
 
         {% if products|length == 0 %}
         <tr>
-          <td colspan="4" class="text-muted">No products yet. Run the seed script to import your CSV.</td>
+          <td colspan="5" class="text-muted">
+            No products yet. Run the seed script to import your CSV.
+          </td>
         </tr>
         {% endif %}
       </tbody>
     </table>
+  </div>
+
+  <div class="mt-2 small text-muted">
+    Tip: If a photo doesn’t show, confirm the filename matches the part number exactly (including dashes) and ends in <b>.png</b>.
   </div>
 </div>
 {% endblock %}
