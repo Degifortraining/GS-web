@@ -1,7 +1,51 @@
 ﻿{% extends "base.html" %}
 {% block content %}
 <div class="bg-white border rounded-4 p-4 shadow-sm">
-  <h1 class="h3 fw-bold mb-2">{{ t('tool_rent') }}</h1>
-  <p class="text-muted mb-0">{{ t('coming_soon') }}</p>
+  <h1 class="h3 fw-bold mb-3">{{ t('tool_rent') }}</h1>
+  <p class="text-muted">Choose a tool, dates, and quantity. Total will be calculated after submit.</p>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th>Description</th>
+          <th>Daily Price (MNT)</th>
+          <th>Available</th>
+          <th style="width: 340px;">Rent</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tool in tools %}
+        <tr>
+          <td class="fw-semibold">{{ tool.name }}</td>
+          <td class="text-muted small">{{ tool.description }}</td>
+          <td>{{ tool.daily_price }}</td>
+          <td>{{ tool.available_qty }}</td>
+          <td>
+            <form method="post" action="{{ url_for('rent.tools') }}" class="row g-2">
+              <input type="hidden" name="tool_id" value="{{ tool.id }}">
+              <div class="col-6">
+                <input type="date" name="start_date" class="form-control form-control-sm" required>
+              </div>
+              <div class="col-6">
+                <input type="date" name="end_date" class="form-control form-control-sm" required>
+              </div>
+              <div class="col-6">
+                <input type="number" name="quantity" min="1" max="{{ tool.available_qty }}" value="1" class="form-control form-control-sm" required>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-dark btn-sm w-100" type="submit">Checkout</button>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if tools|length == 0 %}
+        <tr><td colspan="5" class="text-muted">No tools yet. We will seed tools in the next step.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

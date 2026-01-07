@@ -23,13 +23,11 @@ def create_app():
     login_manager.init_app(app)
     csrf.init_app(app)
 
-    # Email (SMTP via .env)
+    # Email
     init_mail(app)
 
-    # Login settings
     login_manager.login_view = "auth.login"
 
-    # Import models here (after db init) to avoid circular imports
     from .models import User
 
     @login_manager.user_loader
@@ -48,6 +46,10 @@ def create_app():
     from .support import bp as support_bp
     from .contact import bp as contact_bp
 
+    # NEW (Step 7)
+    from .rent import bp as rent_bp
+    from .payments import bp as payments_bp
+
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(services_bp)
@@ -56,7 +58,10 @@ def create_app():
     app.register_blueprint(support_bp)
     app.register_blueprint(contact_bp)
 
-    # Make helpers available in ALL templates
+    # NEW (Step 7)
+    app.register_blueprint(rent_bp)
+    app.register_blueprint(payments_bp)
+
     @app.context_processor
     def inject_helpers():
         return {"t": t, "get_lang": get_lang}

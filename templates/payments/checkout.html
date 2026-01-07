@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="bg-white border rounded-4 p-4 shadow-sm">
+  <h1 class="h3 fw-bold mb-3">Checkout</h1>
+
+  <div class="border rounded-4 p-3 bg-light mb-3">
+    <div><b>Order ID:</b> {{ order.id }}</div>
+    <div><b>Total:</b> {{ order.total_amount }} MNT</div>
+    <div><b>Status:</b> {{ order.status }}</div>
+  </div>
+
+  <p class="text-muted mb-2">Payment methods will be enabled in Step 8 (QPay + Bank).</p>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-dark" disabled>Pay with QPay</button>
+    <button class="btn btn-outline-dark" disabled>Pay with Bank Transfer</button>
+  </div>
+</div>
+{% endblock %}
