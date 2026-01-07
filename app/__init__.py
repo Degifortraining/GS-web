@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 from .config import Config
 from .extensions import db, migrate, login_manager, csrf
 from .i18n import t, get_lang
+from .utils.email_utils import init_mail
 
 load_dotenv()
+
 
 def create_app():
     app = Flask(
@@ -15,20 +17,29 @@ def create_app():
     )
     app.config.from_object(Config)
 
+    # Extensions
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
 
+    # Email (SMTP via .env)
+    init_mail(app)
+
+    # Login settings
     login_manager.login_view = "auth.login"
 
+    # Import models here (after db init) to avoid circular imports
     from .models import User
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        try:
+            return User.query.get(int(user_id))
+        except Exception:
+            return None
 
-    # Register blueprints
+    # Blueprints
     from .main import bp as main_bp
     from .auth import bp as auth_bp
     from .services import bp as services_bp
@@ -45,6 +56,7 @@ def create_app():
     app.register_blueprint(support_bp)
     app.register_blueprint(contact_bp)
 
+    # Make helpers available in ALL templates
     @app.context_processor
     def inject_helpers():
         return {"t": t, "get_lang": get_lang}
