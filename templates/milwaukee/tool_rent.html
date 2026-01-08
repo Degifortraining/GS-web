@@ -1,84 +1,207 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<div class="bg-white border rounded-4 p-4 shadow-sm">
-  <h1 class="h3 fw-bold mb-3">{{ t('tool_rent') }}</h1>
-  <p class="text-muted">
-    Tool images load from <code>static/products/&lt;part_number&gt;.png</code>
-  </p>
 
-  <div class="table-responsive">
-    <table class="table align-middle table-hover">
-      <thead>
-        <tr>
-          <th style="width: 80px;">Photo</th>
-          <th>Tool</th>
-          <th>Description</th>
-          <th style="width: 130px;">Part #</th>
-          <th style="width: 160px;">Daily (1–7) MNT</th>
-          <th style="width: 160px;">Daily (8–30) MNT</th>
-          <th style="width: 110px;">Available</th>
-          <th style="width: 340px;">Rent</th>
-        </tr>
-      </thead>
+<style>
+  .tool-card{
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--card);
+    box-shadow: 0 .6rem 1.2rem rgba(17,17,17,.06);
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease;
+    height: 100%;
+  }
+  .tool-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 .9rem 1.6rem rgba(17,17,17,.10);
+  }
 
-      <tbody>
-        {% for tool in tools %}
-        <tr>
-          <td>
-            {% if tool.part_number %}
-            <img
-              src="{{ url_for('static', filename='products/' ~ tool.part_number ~ '.png') }}"
-              alt="{{ tool.part_number }}"
-              class="rounded border bg-white"
-              style="width: 56px; height: 56px; object-fit: contain;"
-              loading="lazy"
-              onerror="this.style.display='none';"
-            >
-            {% endif %}
-          </td>
+  .tool-img-wrap{
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 170px;
+  }
+  .tool-img{
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+  }
 
-          <td class="fw-semibold">{{ tool.name }}</td>
-          <td class="text-muted small">{{ tool.description }}</td>
-          <td class="small">{{ tool.part_number or "" }}</td>
+  .tool-meta{
+    padding: 14px 16px 16px 16px;
+  }
 
-          <td>{{ "{:,}".format(tool.daily_price) }}</td>
-          <td>
-            {% if tool.daily_price_8_30 is not none %}
-              {{ "{:,}".format(tool.daily_price_8_30) }}
-            {% else %}
-              -
-            {% endif %}
-          </td>
+  .tool-title{
+    font-weight: 800;
+    color: var(--secondary);
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+  }
 
-          <td>{{ tool.available_qty }}</td>
+  .tool-desc{
+    color: var(--muted);
+    font-size: .95rem;
+    min-height: 44px;
+    margin-bottom: 12px;
+  }
 
-          <td>
-            <form method="post" action="{{ url_for('rent.tools') }}" class="row g-2">
-              <input type="hidden" name="tool_id" value="{{ tool.id }}">
-              <div class="col-6">
-                <input type="date" name="start_date" class="form-control form-control-sm" required>
-              </div>
-              <div class="col-6">
-                <input type="date" name="end_date" class="form-control form-control-sm" required>
-              </div>
-              <div class="col-6">
-                <input type="number" name="quantity" min="1" max="{{ tool.available_qty }}" value="1" class="form-control form-control-sm" required>
-              </div>
-              <div class="col-6">
-                <button class="btn btn-dark btn-sm w-100" type="submit">Checkout</button>
-              </div>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
+  .price-box{
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: #fff;
+  }
+  .price-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .price-row:last-child{ margin-bottom: 0; }
 
-        {% if tools|length == 0 %}
-        <tr>
-          <td colspan="8" class="text-muted">No tools yet. Run the seed script to import your Excel file.</td>
-        </tr>
-        {% endif %}
-      </tbody>
-    </table>
+  .price-label{
+    color: var(--muted);
+    font-size: .92rem;
+  }
+  .price-value{
+    font-weight: 800;
+    color: var(--secondary);
+    white-space: nowrap;
+  }
+
+  .badge-soft{
+    background: rgba(102,192,106,.12);
+    color: var(--secondary);
+    border: 1px solid rgba(102,192,106,.35);
+    font-weight: 700;
+  }
+  .badge-out{
+    background: rgba(239,68,68,.10);
+    color: #991b1b;
+    border: 1px solid rgba(239,68,68,.35);
+    font-weight: 700;
+  }
+  .badge-best{
+    background: rgba(59,130,246,.10);
+    color: #1e3a8a;
+    border: 1px solid rgba(59,130,246,.25);
+    font-weight: 800;
+  }
+
+  .tool-footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .small-mono{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: .85rem;
+    color: var(--muted);
+  }
+</style>
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="fw-bold mb-1">{{ t('tool_rent') }}</h1>
+    <div class="text-muted">
+      Tool images load from <span class="small-mono">static/products/&lt;part_number&gt;.png</span>
+    </div>
   </div>
 </div>
+
+{% if not tools %}
+  <div class="card gs-shadow">
+    <div class="card-body">
+      <div class="text-muted">No tools yet. Run the seed script to import your Excel file.</div>
+    </div>
+  </div>
+{% else %}
+
+  <div class="row g-3">
+    {% for tool in tools %}
+      {% set qty = tool.available_qty or 0 %}
+      {% set img_path = "products/" ~ (tool.part_number or "") ~ ".png" %}
+      {% set p1 = tool.daily_price_1_7 if tool.daily_price_1_7 is not none else tool.daily_price %}
+      {% set p2 = tool.daily_price_8_30 if tool.daily_price_8_30 is not none else tool.daily_price %}
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="tool-card">
+
+          <div class="tool-img-wrap">
+            <img
+              src="{{ url_for('static', filename=img_path) }}"
+              class="tool-img"
+              alt="{{ tool.name }}"
+              onerror="this.src='{{ url_for('static', filename='img/logo.png') }}'; this.style.maxHeight='80px'; this.style.opacity='.6';"
+            >
+          </div>
+
+          <div class="tool-meta">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+              <h5 class="tool-title">{{ tool.name }}</h5>
+              {% if qty > 0 %}
+                <span class="badge rounded-pill badge-soft">Available: {{ qty }}</span>
+              {% else %}
+                <span class="badge rounded-pill badge-out">Out of stock</span>
+              {% endif %}
+            </div>
+
+            {% if tool.description %}
+              <div class="tool-desc">{{ tool.description }}</div>
+            {% else %}
+              <div class="tool-desc">—</div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="small-mono">Part #: {{ tool.part_number or "—" }}</div>
+              {% if p2 and p1 and (p2 < p1) %}
+                <span class="badge rounded-pill badge-best">Best value (8–30)</span>
+              {% endif %}
+            </div>
+
+            <div class="price-box">
+              <div class="price-row">
+                <div class="price-label">Daily (1–7 days)</div>
+                <div class="price-value">
+                  {% if p1 is not none %}{{ "{:,}".format(p1) }} MNT{% else %}—{% endif %}
+                </div>
+              </div>
+              <div class="price-row">
+                <div class="price-label">Daily (8–30 days)</div>
+                <div class="price-value">
+                  {% if p2 is not none %}{{ "{:,}".format(p2) }} MNT{% else %}—{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="tool-footer">
+              {% if qty > 0 %}
+                <!-- Keep existing flow: button links to tool rent checkout route if you already have it -->
+                <a class="btn btn-gs-primary btn-sm"
+                   href="{{ url_for('milwaukee.tool_rent_checkout', tool_id=tool.id) if (url_for is defined) else '#' }}">
+                  Rent
+                </a>
+              {% else %}
+                <button class="btn btn-gs-outline btn-sm" disabled>Not available</button>
+              {% endif %}
+
+              <a class="btn btn-gs-outline btn-sm" href="{{ url_for('milwaukee.tool_rent') }}">Refresh</a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% endif %}
+
 {% endblock %}
