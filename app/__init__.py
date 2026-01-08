@@ -12,12 +12,7 @@ def create_app():
 
     # --- Config ---
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-me")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL".lower()) or os.getenv("DATABASE_URL".upper())  # compatibility
-    if not app.config["SQLALCHEMY_DATABASE_URI"]:
-        app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "") or os.getenv("DATABASE_URI", "") or os.getenv("DATABASE_URL".lower(), "")
-    # your project uses DATABASE_URL in .env, but you showed DATABASE_URL=sqlite:///greystone.db earlier
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", os.getenv("DATABASE_URI", os.getenv("DATABASE_URL", "sqlite:///greystone.db")))
-    # If you use DATABASE_URL=sqlite:///greystone.db this works.
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///greystone.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # --- Init extensions ---
@@ -25,18 +20,18 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
-    # --- Blueprints ---
-    from app.main.routes import main_bp
-    from app.services.routes import services_bp
-    from app.milwaukee.routes import milwaukee_bp
-    from app.invoices.routes import invoices_bp
-    from app.support.routes import support_bp
-    from app.contact.routes import contact_bp
-    from app.auth.routes import auth_bp
+    # --- Blueprints (your project uses `bp` names) ---
+    from app.main.routes import bp as main_bp
+    from app.services.routes import bp as services_bp
+    from app.milwaukee.routes import bp as milwaukee_bp
+    from app.invoices.routes import bp as invoices_bp
+    from app.support.routes import bp as support_bp
+    from app.contact.routes import bp as contact_bp
+    from app.auth.routes import bp as auth_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(services_bp)
-    app.register_blueprint(milwaukee_bp)   # ✅ this creates endpoint names like milwaukee.products
+    app.register_blueprint(milwaukee_bp)
     app.register_blueprint(invoices_bp)
     app.register_blueprint(support_bp)
     app.register_blueprint(contact_bp)
