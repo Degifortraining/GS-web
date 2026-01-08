@@ -1,70 +1,43 @@
-﻿from flask import render_template, redirect, url_for, flash
+﻿from flask import Blueprint, render_template
 from flask_login import login_required
 
-from ..extensions import db
-from ..forms_models import QuoteRequest
-from ..utils.forms import QuoteRequestForm
-from ..utils.email_utils import send_basic_email
+from app.rent.models import Tool
 
-from ..products.models import Product  # NEW
-from . import bp
+milwaukee_bp = Blueprint("milwaukee", __name__, url_prefix="/milwaukee")
 
 
-@bp.route("/products")
+@milwaukee_bp.route("/products")
 def products():
-    products = Product.query.order_by(Product.part_number.asc()).all()
-    return render_template("milwaukee/products.html", products=products)
+    return render_template("milwaukee/products.html")
 
 
-@bp.route("/quote", methods=["GET", "POST"])
+@milwaukee_bp.route("/quote", methods=["GET", "POST"])
 def quote():
-    form = QuoteRequestForm()
-    if form.validate_on_submit():
-        record = QuoteRequest(
-            name=form.name.data.strip(),
-            email=form.email.data.strip().lower(),
-            phone=(form.phone.data.strip() if form.phone.data else None),
-            item=form.item.data.strip(),
-            quantity=form.quantity.data,
-            message=form.message.data.strip(),
-        )
-        db.session.add(record)
-        db.session.commit()
-
-        send_basic_email(
-            to_email=record.email,
-            subject="Grey Stone - Quote request received",
-            body=f"Hello {record.name},\n\nWe received your quote request for: {record.item}.\nWe will contact you soon.\n\n- Grey Stone",
-        )
-
-        flash("Quote request submitted successfully!", "success")
-        return redirect(url_for("milwaukee.quote"))
-
-    return render_template("milwaukee/quote.html", form=form)
+    return render_template("milwaukee/quote.html")
 
 
-@bp.route("/buy")
+@milwaukee_bp.route("/buy", methods=["GET", "POST"])
 def buy():
     return render_template("milwaukee/buy.html")
 
 
-@bp.route("/tool-rent")
+@milwaukee_bp.route("/safety")
+def safety():
+    return render_template("milwaukee/safety.html")
+
+
+# ✅ Support BOTH URLs: /tool_rent and /tool-rent
+@milwaukee_bp.route("/tool_rent")
+@milwaukee_bp.route("/tool-rent")
+@login_required
 def tool_rent():
-    return render_template("milwaukee/tool_rent.html")
+    tools = Tool.query.order_by(Tool.id.desc()).all()
+    return render_template("milwaukee/tool_rent.html", tools=tools)
 
 
-@bp.route("/tool-rent/checkout")
+# ✅ Support BOTH checkout URLs too
+@milwaukee_bp.route("/tool_rent/checkout", methods=["GET", "POST"])
+@milwaukee_bp.route("/tool-rent/checkout", methods=["GET", "POST"])
 @login_required
 def tool_rent_checkout():
     return render_template("milwaukee/tool_rent_checkout.html")
-
-
-@bp.route("/tool-rent/receipt")
-@login_required
-def tool_rent_receipt():
-    return render_template("milwaukee/tool_rent_receipt.html")
-
-
-@bp.route("/safety")
-def safety():
-    return render_template("milwaukee/safety.html")
