@@ -184,9 +184,8 @@
 
             <div class="tool-footer">
               {% if qty > 0 %}
-                <!-- Keep existing flow: button links to tool rent checkout route if you already have it -->
-                <a class="btn btn-gs-primary btn-sm"
-                   href="{{ url_for('milwaukee.tool_rent_checkout', tool_id=tool.id) if (url_for is defined) else '#' }}">
+                <!-- FIX: your current checkout route has no tool_id param -->
+                <a class="btn btn-gs-primary btn-sm" href="{{ url_for('milwaukee.tool_rent_checkout') }}">
                   Rent
                 </a>
               {% else %}
